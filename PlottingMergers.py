@@ -235,6 +235,8 @@ MassMainDMO =[]
 R200DMO = [] 
 EvolvedPositionsDMO = [] 
 EvolvedTimesDMO = []
+statusDMO = [] 
+
 
 CentersMergingObjectsHYDRO =[]
 CentersMainHaloHYDRO = []
@@ -247,7 +249,9 @@ MassMainHydro = []
 R200HYDRO = [] 
 EvolvedPositionsHYDRO = [] 
 EvolvedTimesHYDRO = []
- 
+statusHYDRO = [] 
+
+
 print("starting loop")
 
 
@@ -287,6 +291,14 @@ for z in range(len(GroupedRedshiftsHYDRO)):
     simfnDMO = os.path.join(pynbody_path,DMOname,output_num)                                                         
     DMOParticles = pynbody.load(simfnDMO)                                                                            
     DMOParticles.physical_units()
+    
+    simfnDMOprev = os.path.join(pynbody_path,DMOname,Prev_output_num)                                                         
+    DMOParticlesprev = pynbody.load(simfnDMOprev)                                                                            
+    DMOParticlesprev.physical_units()
+    
+    simfnDMONext = os.path.join(pynbody_path,DMOname,Next_output_num)                                                         
+    DMOParticlesNext = pynbody.load(simfnDMONext)                                                                            
+    DMOParticlesNext.physical_units()
     #pynbody.analysis.halo.center(DMOParticles.halos()[int(findAHFhalonumINSITU(DMOname,output_num)) - 1])
     #MainParticles = DMOParticles.halos(halo_numbers='v1')[int(findAHFhalonumINSITU(DMOname,output_num)) ]
     MainParticles = DMOParticles.halos()[MainHaloDMOThisRedshift.calculate("halo_number()")]
@@ -300,14 +312,11 @@ for z in range(len(GroupedRedshiftsHYDRO)):
     for DMOhalo in DMOHalosThisRedshift:
             
         try:
-            #AHFhalonumACC = findAHFhalonumACC(int(DMOhalo.calculate("halo_number()")),DMOname,output_num)
-            #if len(AHFhalonumACC) == 0:
-            #    continue 
-            #MainVelx = MainParticles.properties["VXc"]
-            #MainVely = MainParticles.properties["VYc"]
-            #MainVelz = MainParticles.properties["VZc"]
             dm_mass.append(MainHaloDMOThisRedshift.calculate("M200c")/DMOhalo.calculate("M200c"))
-
+                        
+            vels = DMOParticles.halos()[int(DMOhalo.calculate("halo_number()")) - 1]["vel"]
+            ParticlesAtCurrentTime = DMOParticles.halos()[int(DMOhalo.calculate("halo_number()")) - 1]['iord']
+            
             MassesDMO.append(DMOhalo.calculate("M200c")) 
             HnumsDMO.append(DMOhalo.calculate("halo_number()"))
             MassMainDMO.append(MainHaloDMOThisRedshift.calculate("M200c"))
@@ -315,38 +324,27 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             
             CentersMergingObjectsDMO.append(DMOhalo["shrink_center"])
             CentersMainHaloDMO.append(MainHaloDMOThisRedshift["shrink_center"])
-            
-            #AHFhalonumACC = findAHFhalonumACC(int(DMOhalo.calculate("halo_number()")),DMOname,output_num)
-            
-            vels = DMOParticles.halos()[int(DMOhalo.calculate("halo_number()")) - 1]["vel"]
-
-            mergertimestep.append(DMOParticles.halos()[int(DMOhalo.calculate("halo_number()")) - 1].d['iord'])
-
-            simfnDMO = os.path.join(pynbody_path,DMOname,Prev_output_num)                                                         
-            DMOParticles = pynbody.load(simfnDMO)                                                                            
-
-            
-            
-            
-            simfnDMO = os.path.join(pynbody_path,DMOname,Next_output_num)                                                         
-            DMOParticles = pynbody.load(simfnDMO)                                                                            
 
 
-            
-            
-            
-            #merginghaloAHF = DMOParticles.halos(halo_numbers='v1')[AHFhalonumACC] 
+
             
             TDMO.append(DMOhalo.calculate("t()"))
             ZDMO.append(DMOhalo.calculate("z()"))
-            #VelDMO.append([np.mean(merginghaloAHF["vel"][:,0])-MainVelx , np.mean(merginghaloAHF["vel"][:,1])-MainVely, np.mean(merginghaloAHF["vel"][:,0]) - MainVelz])
+
             VelDMO.append([np.mean(vels[:,0]-MainVelx) , np.mean(vels[:,1]-MainVely), np.mean(vels[:,2] - MainVelz)])
+
+            ParticlesAtPrevTime = DMOParticlesprev[np.isin(DMOParticlesprev['iord'],ParticlesAtCurrentTime)]
+            ParticlesAtNextTime = DMOParticlesNext[np.isin(DMOParticlesNext['iord'],ParticlesAtCurrentTime)]
+
+            
+            
+            
             
         except:
             dm_mass.append(0)
-            continue
+            continue            
 
-
+    
     
     print("loading in hydro data")
     # load in HYDRO data 
