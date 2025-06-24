@@ -10,22 +10,6 @@ import os
 from scipy.spatial.distance import cdist
 ### Function defs 
 #pynbody.config["halo-class-priority"] = [pynbody.halo.ahf.AHFCatalogue]
-
-
-'''
-def calculate_Rizzo_energy_distance(X,Y):
-
-    # Returns a measure of simmilarity between two distributions called the Energy Distance 
-    # A lower energy distance = distributions are more simmilar (vice-versa)
-    # citation: WIREs Comput Stat 2016, 8:27–38. doi: 10.1002/wics.1375 (see sec. TESTING FOR EQUAL DISTRIBUTIONS)
-    
-    XYMeanCdist = np.mean(cdist(X, Y))   # Spread between the two distributions of samples
-    XXMeanCdist = np.mean(cdist(X, X))   # Spread within distribution X
-    YYMeanCdist = np.mean(cdist(Y, Y))   # Spread within distribution Y
-    
-    return 2 *XYMeanCdist - XXMeanCdist - YYMeanCdist 
-'''
-
     
 
 def findAHFhalonumACC(HOPhalonum,NameOfSim,Snap):
@@ -81,9 +65,6 @@ def group_mergers(z_merges,h_merges,q_merges):
 
             for merging_halo_object in list_of_halos:
 
-                #halos_merging_at_current_z = np.append(halos_merging_at_current_z, h_merges[merging_halo_object][1:])                                       
-                #print("len hmerge: ",len(h_merges[merging_halo_object][1:]))                                                                                
-                #qvals = np.append(qvals,q_merges[merging_halo_object])                                                                                      
                 haloM =  h_merges[merging_halo_object][1:][0]
 
                 halonums_over_life, ts_over_life = haloM.calculate_for_progenitors("halo_number()","t()")
@@ -119,15 +100,6 @@ def group_mergers(z_merges,h_merges,q_merges):
 
                 else:
                     m200s_list = np.append(m200s_list,0)
-
-                #halonums_over_life, ts_over_life = haloM.calculate_for_progenitors("halo_number()","t()")                                                   
-
-                #for h,t in zip(halonums_over_life[0],ts_over_life[0]):                                                                                      
-
-                #if np.logical_not(np.isin(tuple(h,t),lists_of_halos_merging_at_current_z)):                                                                 
-
-                #lists_of_halos_merging_at_current_z = np.append(lists_of_halos_merging_at_current_z,tuple(h,t))                                             
-
 
             all_halos_merging_at_current_z.append(halos_merging_at_current_z)
 
@@ -356,18 +328,9 @@ for z in range(len(GroupedRedshiftsHYDRO)):
     outputHYDRO = str(HYDROsim.timesteps[ TimeStepIdxsHYDRO[HYDROTimestepThisMerger]  ]).split("/")[-1][:12]
     simfnHYDRO = os.path.join(pynbody_path,HYDROname,outputHYDRO)
     HYDROParticles = pynbody.load(simfnHYDRO)
-    #pynbody.analysis.halo.center(HYDROParticles.halos()[int(HaloNumsHYDRO[HYDROhalonumidx]) - 1])
-    #HYDROMainHalo = HYDROParticles.halos()[int(HaloNumsHYDRO[HYDROhalonumidx]) - 1]
     HYDROMainHalo = HYDROParticles.halos(halo_numbers='v1')[int(findAHFhalonumINSITU(HYDROname,outputHYDRO))]
     HYDROParticles.physical_units()
     
-    #ParticlesLoadedIn = False
-    
-    #MainParticles = DMOParticles.halos()[int(findAHFhalonumINSITU(DMOname,output_num)) - 1]
-
-    #MainVelx = HYDROMainHalo.properties["VXc"]
-    #MainVely = HYDROMainHalo.properties["VYc"]
-    #MainVelz = HYDROMainHalo.properties["VZc"]
     MainVelx = np.mean(HYDROMainHalo["vel"][:,0])
     MainVely = np.mean(HYDROMainHalo["vel"][:,1])
     MainVelz = np.mean(HYDROMainHalo["vel"][:,2])
@@ -377,118 +340,24 @@ for z in range(len(GroupedRedshiftsHYDRO)):
         
         try:
             
-            #THYDRO.append(MergingHYDROhalo.calculate("t()"))
-            #ZHYDRO.append(MergingHYDROhalo.calculate("z()"))
             MassHYDRO.append(MergingHYDROhalo.calculate("M200c_DM"))
             CentersMergingObjectsHYDRO.append(MergingHYDROhalo["shrink_center"])
             CentersMainHaloHYDRO.append(HYDROMainHaloThisRedshift["shrink_center"])
             HnumsHYDRO.append(MergingHYDROhalo.calculate("halo_number()"))
             MassMainHydro.append(HYDROMainHaloThisRedshift["M200c_DM"])
-            #AHFhalonumACC = findAHFhalonumACC(int(MergingHYDROhalo.calculate("halo_number()")),HYDROname,outputHYDRO)
             R200HYDRO.append(HYDROMainHaloThisRedshift.calculate("r200c"))
-            # Use AHF Halo prop VelCX.
-            #print("halonum:",AHFhalonumACC)
             MergingHYDROPynbody = HYDROParticles.halos()[int(MergingHYDROhalo.calculate("halo_number()")) - 1 ]
 
             THYDRO.append(MergingHYDROhalo.calculate("t()"))
             ZHYDRO.append(MergingHYDROhalo.calculate("z()"))
-            #HYDROMainHalo.properties["VelCX"]
+
             VelHYDRO.append([np.mean(MergingHYDROPynbody["vel"][:,0] - MainVelx) , np.mean(MergingHYDROPynbody["vel"][:,1]-MainVely), np.mean(MergingHYDROPynbody["vel"][:,2]-MainVelz) ])
             
-            #THYDRO.append(MergingHYDROhalo.calculate("t()"))
-            #ZHYDRO.append(MergingHYDROhalo.calculate("z()"))
         except Exception as e:
             print(e)
             continue 
             
             
-        '''
-
-        try: 
-            MergingHYDROhalo["M200c_stars"]
-            
-            if MergingHYDROhalo["M200c_stars"] == 0: 
-                print("No Mstar")
-                continue 
-            
-        except Exception as e: 
-            print(e)
-            continue
-
-        
-        try:
-            m200MergingHYDROhalo = HYDROMainHaloThisRedshift["M200c"]/MergingHYDROhalo["M200c"]
-        
-            print("added")
-
-        except Exception as er:
-            print(er)
-            continue
-            
-            
-        # sorts mass difference in M200 in ascending order    
-        closest_mass_match = np.argsort(np.abs(np.asarray(dm_mass) - m200MergingHYDROhalo))[:5]                                  
-        print("tangos ended")
-        ### Tangos part ends and energy distance calculation starts 
-        #HYDRO halo 6D array
-        MergingHYDROHaloNumber = MergingHYDROhalo.calculate("halo_number()")
-        MergingHYDROHaloParticles = HYDROParticles.halos()[int(MergingHYDROHaloNumber)-1]
-        MergingHYDROHaloParticles = MergingHYDROHaloParticles[MergingHYDROHaloParticles["r"] < 2]
-
-        px = MergingHYDROHaloParticles.dm["vel"][:,0]*MergingHYDROHaloParticles.dm["mass"]
-        py = MergingHYDROHaloParticles.dm["vel"][:,1]*MergingHYDROHaloParticles.dm["mass"]
-        pz = MergingHYDROHaloParticles.dm["vel"][:,2]*MergingHYDROHaloParticles.dm["mass"]
-        
-        PhaseArrayHydro = np.stack((MergingHYDROHaloParticles.d['x'], MergingHYDROHaloParticles.d['y'], MergingHYDROHaloParticles.d['z'], px, py, pz), axis=1)
-
-        # Load in DMO data
-        if ParticlesLoadedIn == False:          
-            # load in DMO pynbody data
-            output_num = str(DMOsim.timesteps[ tstepidxsDMO[z] ]).split("/")[-1][:12]
-            simfnDMO = os.path.join(pynbody_path,DMOname,output_num)
-            DMOParticles = pynbody.load(simfnDMO)
-            DMOParticles.physical_units()
-            ParticlesLoadedIn= True
-
-            print("loaded in DMO")
-        
-
-        PhaseArraysDMO = []
-        for MassMatch in closest_mass_match:
-            MassMatchedDMOHalo = DMOHalosThisRedshift[MassMatch]
-            HaloNumMassMatchedDMOHalo = MassMatchedDMOHalo.calculate("halo_number()")
-            MassMatchedDMOHaloParticles = DMOParticles.halos()[int(HaloNumMassMatchedDMOHalo) - 1]
-            MassMatchedDMOHaloParticles = MassMatchedDMOHaloParticles[MassMatchedDMOHaloParticles['r'] < 2]
-            pxd = MassMatchedDMOHaloParticles["vel"][:,0]*MassMatchedDMOHaloParticles["mass"]
-            pyd = MassMatchedDMOHaloParticles["vel"][:,1]*MassMatchedDMOHaloParticles["mass"]
-            pzd = MassMatchedDMOHaloParticles["vel"][:,2]*MassMatchedDMOHaloParticles["mass"]
-            PhaseArraysDMO.append(np.stack((MassMatchedDMOHaloParticles["x"],MassMatchedDMOHaloParticles["y"],MassMatchedDMOHaloParticles["z"],pxd,pyd,pzd),axis=1))
-            
-
-        EnergyDistances = np.array([])
-
-        for PhaseArrayDMO in PhaseArraysDMO: 
-
-            EnergyDistanceHalo = calculate_Rizzo_energy_distance(PhaseArrayDMO,PhaseArrayHydro)
-            EnergyDistances = np.append(EnergyDistances,EnergyDistanceHalo)
-
-        
-        best_match_2_fold =  closest_mass_match[np.argmin(EnergyDistances)]
-        
-
-        hydrohalo_matched.append(MergingHYDROhalo)
-        HydroHaloMstars.append(MergingHYDROhalo["M200c_stars"])
-        dmohalo_matched.append(DMOHalosThisRedshift[best_match_2_fold])
-        #dmohalo_matched.append(d.timesteps[idx_of_best_match[z]].halos[closest_mass_match[0]])
-        '''
-#print(hydrohalo_matched)
-#print(dmohalo_matched)
-
-#df = pd.DataFrame({"halo":dmohalo_matched,"mstar":HydroHaloMstars,"hydrohalo":hydrohalo_matched})                                                                  
-
-#print(df)
-#df.to_csv("dmo_hydro_crossreffs/TwoFoldCrossreff_WithPynbody_"+DMOname+".csv")                    
-
 
 print(len(MassHYDRO),len(HnumsHYDRO),len(CentersMergingObjectsHYDRO),len(CentersMainHaloHYDRO),len(VelHYDRO),len(THYDRO))
 
