@@ -10,7 +10,11 @@ import os
 from scipy.spatial.distance import cdist
 ### Function defs 
 #pynbody.config["halo-class-priority"] = [pynbody.halo.ahf.AHFCatalogue]
-    
+
+def mutual(halo, IDs):
+    tf = np.in1d(halo.d["iord"], IDs)
+    return (len(tf[tf]) ** 2) / ((len(halo.d) * len(IDs)))
+
 
 def findAHFhalonumACC(HOPhalonum,NameOfSim,Snap):
     
@@ -276,7 +280,10 @@ for z in range(len(GroupedRedshiftsHYDRO)):
     dm_mass = []    
     
 
-    output_num = str(DMOsim.timesteps[ tstepidxsDMO[z] ]).split("/")[-1][:12]                                        
+    output_num = str(DMOsim.timesteps[ tstepidxsDMO[z] ]).split("/")[-1][:12] 
+    Prev_output_num = str(int(output_num) - 1).zfill(5)  
+    Next_output_num = str(int(output_num) + 1).zfill(5)  
+
     simfnDMO = os.path.join(pynbody_path,DMOname,output_num)                                                         
     DMOParticles = pynbody.load(simfnDMO)                                                                            
     DMOParticles.physical_units()
@@ -285,6 +292,8 @@ for z in range(len(GroupedRedshiftsHYDRO)):
     MainParticles = DMOParticles.halos()[MainHaloDMOThisRedshift.calculate("halo_number()")]
     #print(MainParticles.properties)
 
+    mergertimestep = [] 
+    
     MainVelx = np.mean(MainParticles["vel"][:,0])
     MainVely = np.mean(MainParticles["vel"][:,1])
     MainVelz = np.mean(MainParticles["vel"][:,2])
@@ -310,6 +319,22 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             #AHFhalonumACC = findAHFhalonumACC(int(DMOhalo.calculate("halo_number()")),DMOname,output_num)
             
             vels = DMOParticles.halos()[int(DMOhalo.calculate("halo_number()")) - 1]["vel"]
+
+            mergertimestep.append(DMOParticles.halos()[int(DMOhalo.calculate("halo_number()")) - 1].d['iord'])
+
+            simfnDMO = os.path.join(pynbody_path,DMOname,Prev_output_num)                                                         
+            DMOParticles = pynbody.load(simfnDMO)                                                                            
+
+            
+            
+            
+            simfnDMO = os.path.join(pynbody_path,DMOname,Next_output_num)                                                         
+            DMOParticles = pynbody.load(simfnDMO)                                                                            
+
+
+            
+            
+            
             #merginghaloAHF = DMOParticles.halos(halo_numbers='v1')[AHFhalonumACC] 
             
             TDMO.append(DMOhalo.calculate("t()"))
