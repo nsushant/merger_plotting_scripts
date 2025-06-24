@@ -316,6 +316,7 @@ for z in range(len(GroupedRedshiftsHYDRO)):
                         
             vels = DMOParticles.halos()[int(DMOhalo.calculate("halo_number()")) - 1]["vel"]
             ParticlesAtCurrentTime = DMOParticles.halos()[int(DMOhalo.calculate("halo_number()")) - 1]['iord']
+            MainParticlesAtCurrentTime = DMOParticles.halos()[int(MainHaloDMOThisRedshift.calculate("halo_number()")) - 1]['iord']
             
             MassesDMO.append(DMOhalo.calculate("M200c")) 
             HnumsDMO.append(DMOhalo.calculate("halo_number()"))
@@ -324,20 +325,43 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             
             CentersMergingObjectsDMO.append(DMOhalo["shrink_center"])
             CentersMainHaloDMO.append(MainHaloDMOThisRedshift["shrink_center"])
-
-
-
             
             TDMO.append(DMOhalo.calculate("t()"))
             ZDMO.append(DMOhalo.calculate("z()"))
 
             VelDMO.append([np.mean(vels[:,0]-MainVelx) , np.mean(vels[:,1]-MainVely), np.mean(vels[:,2] - MainVelz)])
 
+            
             ParticlesAtPrevTime = DMOParticlesprev[np.isin(DMOParticlesprev['iord'],ParticlesAtCurrentTime)]
+            MainParticlesAtPrevTime = DMOParticlesprev[np.isin(DMOParticlesprev['iord'],MainParticlesAtCurrentTime)]
+
+            MassesDMO.append(DMOhalo.calculate("M200c")) 
+            HnumsDMO.append(DMOhalo.calculate("halo_number()"))
+            MassMainDMO.append(MainHaloDMOThisRedshift.calculate("M200c"))
+            R200DMO.append(MainHaloDMOThisRedshift.calculate("r200c"))
+            
+            CentersMergingObjectsDMO.append(pynbody.analysis.halo.center(ParticlesAtPrevTime,retcen=True))
+            CentersMainHaloDMO.append(pynbody.analysis.halo.center(MainParticlesAtPrevTime,retcen=True))
+            
+            TDMO.append(DMOhalo.calculate("t()"))
+            ZDMO.append(DMOhalo.calculate("z()"))
+
+
+
+            MainParticlesAtNextTime = DMOParticlesNext[np.isin(DMOParticlesNext['iord'],MainParticlesAtCurrentTime)]
             ParticlesAtNextTime = DMOParticlesNext[np.isin(DMOParticlesNext['iord'],ParticlesAtCurrentTime)]
 
+            MassesDMO.append(DMOhalo.calculate("M200c")) 
+            HnumsDMO.append(DMOhalo.calculate("halo_number()"))
+            MassMainDMO.append(MainHaloDMOThisRedshift.calculate("M200c"))
+            R200DMO.append(MainHaloDMOThisRedshift.calculate("r200c"))
             
+            CentersMergingObjectsDMO.append(pynbody.analysis.halo.center(ParticlesAtNextTime,retcen=True))
+            CentersMainHaloDMO.append(pynbody.analysis.halo.center(MainParticlesAtNextTime,retcen=True))
             
+            TDMO.append(DMOhalo.calculate("t()"))
+            ZDMO.append(DMOhalo.calculate("z()"))
+
             
             
         except:
