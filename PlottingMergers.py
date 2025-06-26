@@ -284,8 +284,8 @@ for z in range(len(GroupedRedshiftsHYDRO)):
     dm_mass = []    
 
     output_num = str(DMOsim.timesteps[ tstepidxsDMO[z] ]).split("/")[-1][:12] 
-    Prev_output_num = str(int(output_num) - 1).zfill(5)  
-    Next_output_num = str(int(output_num) + 1).zfill(5)  
+    Prev_output_num = "output_" + str(int(output_num.split("_")[1]) - 1).zfill(5)  
+    Next_output_num = "output_" + str(int(output_num.split("_")[1]) + 1).zfill(5)  
 
     simfnDMO = os.path.join(pynbody_path,DMOname,output_num)                                                         
     DMOParticles = pynbody.load(simfnDMO)                                                                            
@@ -301,7 +301,7 @@ for z in range(len(GroupedRedshiftsHYDRO)):
     #pynbody.analysis.halo.center(DMOParticles.halos()[int(findAHFhalonumINSITU(DMOname,output_num)) - 1])
     #MainParticles = DMOParticles.halos(halo_numbers='v1')[int(findAHFhalonumINSITU(DMOname,output_num)) ]
     MainParticles = DMOParticles.halos()[MainHaloDMOThisRedshift.calculate("halo_number()")]
-    MainParticlesAtNextTime = DMOParticlesNext[np.isin(DMOParticlesNext['iord'],MainParticlesAtCurrentTime)]
+    MainParticlesAtNextTime = DMOParticlesNext[np.isin(DMOParticlesNext['iord'],MainParticles)]
     MainParticlesAtPrevTime = DMOParticlesprev.halos()[int(MainHaloDMOThisRedshift.calculate_for_progenitors("halo_number()")[0][1]) - 1]
 
     #print(MainParticles.properties)
@@ -344,11 +344,12 @@ for z in range(len(GroupedRedshiftsHYDRO)):
 
             VelDMO.append([np.mean(vels[:,0]-MainVelx) , np.mean(vels[:,1]-MainVely), np.mean(vels[:,2] - MainVelz)])
             statusDMO.append("Current")
+            print("finished current")
             # Next Snap 
             
             
             ParticlesAtNextTime = DMOParticlesNext[np.isin(DMOParticlesNext['iord'],ParticlesAtCurrentTime)]
-
+            print(ParticlesAtNextTime,DMOParticlesNext)
             vels = ParticlesAtNextTime["vel"]
 
             MassesDMO.append(DMOhalo.calculate("M200c")) 
@@ -356,15 +357,15 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             MassMainDMO.append(MainHaloDMOThisRedshift.calculate("M200c"))
             R200DMO.append(MainHaloDMOThisRedshift.calculate("r200c"))
             
-            CentersMergingObjectsDMO.append(pynbody.analysis.halo.center(ParticlesAtNextTime,retcen=True))
-            CentersMainHaloDMO.append(pynbody.analysis.halo.center(MainParticlesAtNextTime,retcen=True))
+            CentersMergingObjectsDMO.append(pynbody.analysis.halo.center(ParticlesAtNextTime.dm,retcen=True))
+            CentersMainHaloDMO.append(pynbody.analysis.halo.center(MainParticlesAtNextTime.dm,retcen=True))
             
             TDMO.append(DMOhalo.calculate("t()"))
             ZDMO.append(DMOhalo.calculate("z()"))
 
             VelDMO.append([np.mean(vels[:,0]-MainVelxNext) , np.mean(vels[:,1]-MainVelyNext), np.mean(vels[:,2] - MainVelzNext)])
             statusDMO.append("Next")
-            
+            print("finished Next")
             # Previous Snapshot 
             
             
@@ -384,7 +385,7 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             ZDMO.append(DMOhalo.calculate("z()"))
             VelDMO.append([np.mean(vels[:,0]-MainVelxPrev) , np.mean(vels[:,1]-MainVelyPrev), np.mean(vels[:,2] - MainVelzPrev)])
             statusDMO.append("Previous")
-
+            print("finished Prev")
         except Exception as eDMO:
             print(eDMO)
             continue 
@@ -395,23 +396,23 @@ for z in range(len(GroupedRedshiftsHYDRO)):
     print("loading in hydro data")
     # load in HYDRO data 
     outputHYDRO = str(HYDROsim.timesteps[ TimeStepIdxsHYDRO[HYDROTimestepThisMerger]  ]).split("/")[-1][:12]
-    Prev_output_num = str(int(outputHYDRO) - 1).zfill(5)  
-    Next_output_num = str(int(outputHYDRO) + 1).zfill(5)  
+    Prev_output_num = "output_" + str(int(outputHYDRO.split("_")[1]) - 1).zfill(5)  
+    Next_output_num = "output_" + str(int(outputHYDRO.split("_")[1]) + 1).zfill(5)  
     
     simfnHYDRO = os.path.join(pynbody_path,HYDROname,outputHYDRO)
     HYDROParticles = pynbody.load(simfnHYDRO)
     HYDROMainHalo = HYDROParticles.halos()[int(HYDROMainHaloThisRedshift.calculate("halo_number()")) - 1 ]
 
-    simfnDMOprev = os.path.join(pynbody_path,DMOname,Prev_output_num)                                                         
-    DMOParticlesprev = pynbody.load(simfnDMOprev)                                                                            
-    DMOParticlesprev.physical_units()
+    simfnHYDROprev = os.path.join(pynbody_path,HYDROname,Prev_output_num)                                                         
+    HYDROParticlesprev = pynbody.load(simfnHYDROprev)                                                                            
+    HYDROParticlesprev.physical_units()
     
-    simfnDMONext = os.path.join(pynbody_path,DMOname,Next_output_num)                                                         
-    DMOParticlesNext = pynbody.load(simfnDMONext)                                                                            
-    DMOParticlesNext.physical_units()
+    simfnHYDRONext = os.path.join(pynbody_path,HYDROname,Next_output_num)                                                         
+    HYDROParticlesNext = pynbody.load(simfnHYDRONext)                                                                            
+    HYDROParticlesNext.physical_units()
 
     
-    HYDROMainParticlesAtNextTime =  HYDROParticlesNext[np.isin(HYDROParticlesNext['iord'],HYDROMainHalo)]
+    HYDROMainParticlesAtNextTime =  HYDROParticlesNext[np.isin(HYDROParticlesNext['iord'],HYDROMainHalo['iord'])]
     HYDROMainParticlesAtPrevTime = HYDROParticlesprev.halos()[int(HYDROMainHaloThisRedshift.calculate_for_progenitors("halo_number()")[0][1]) - 1]
 
     HYDROParticles.physical_units()
