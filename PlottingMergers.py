@@ -343,7 +343,7 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             ZDMO.append(DMOhalo.calculate("z()"))
 
             VelDMO.append([np.mean(vels[:,0]-MainVelx) , np.mean(vels[:,1]-MainVely), np.mean(vels[:,2] - MainVelz)])
-
+            statusDMO.append("Current")
             # Next Snap 
             
             
@@ -363,12 +363,12 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             ZDMO.append(DMOhalo.calculate("z()"))
 
             VelDMO.append([np.mean(vels[:,0]-MainVelxNext) , np.mean(vels[:,1]-MainVelyNext), np.mean(vels[:,2] - MainVelzNext)])
-
+            statusDMO.append("Next")
             
             # Previous Snapshot 
             
             
-            ParticlesAtPrevTime = DMOParticlesprev.halos()[int(DMOhalo.calculate("halo_number()")[0][1]) - 1]
+            ParticlesAtPrevTime = DMOParticlesprev.halos()[int(DMOhalo.calculate_for_progenitors("halo_number()")[0][1]) - 1]
 
             vels = ParticlesAtPrevTime["vel"]
             
@@ -383,7 +383,11 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             TDMO.append(DMOhalo.calculate("t()"))
             ZDMO.append(DMOhalo.calculate("z()"))
             VelDMO.append([np.mean(vels[:,0]-MainVelxPrev) , np.mean(vels[:,1]-MainVelyPrev), np.mean(vels[:,2] - MainVelzPrev)])
+            statusDMO.append("Previous")
 
+        except Exception as eDMO:
+            print(eDMO)
+            continue 
 
 
     
@@ -429,7 +433,7 @@ for z in range(len(GroupedRedshiftsHYDRO)):
         print(MergingHYDROhalo)
         
         try:
-            
+            # Current 
             MassHYDRO.append(MergingHYDROhalo.calculate("M200c_DM"))
             CentersMergingObjectsHYDRO.append(MergingHYDROhalo["shrink_center"])
             CentersMainHaloHYDRO.append(HYDROMainHaloThisRedshift["shrink_center"])
@@ -442,9 +446,12 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             ZHYDRO.append(MergingHYDROhalo.calculate("z()"))
 
             VelHYDRO.append([np.mean(MergingHYDROPynbody["vel"][:,0] - MainVelx) , np.mean(MergingHYDROPynbody["vel"][:,1]-MainVely), np.mean(MergingHYDROPynbody["vel"][:,2]-MainVelz) ])
-            '''
-            ParticlesAtNextTime = DMOParticlesNext[np.isin(DMOParticlesNext['iord'],ParticlesAtCurrentTime)]
+            statusHYDRO.append("Current")
 
+            # Next
+            
+            ParticlesAtNextTime = HYDROParticlesNext[np.isin(HYDROParticlesNext['iord'],MergingHYDROPynbody['iord'])]
+            
             vels = ParticlesAtNextTime["vel"]
 
             MassHYDRO.append(MergingHYDROhalo.calculate("M200c_DM"))
@@ -452,34 +459,49 @@ for z in range(len(GroupedRedshiftsHYDRO)):
             MassMainHydro.append(HYDROMainHaloThisRedshift["M200c_DM"])
             R200HYDRO.append(HYDROMainHaloThisRedshift.calculate("r200c"))
             
-            MergingHYDROPynbody = HYDROParticles.halos()[int(MergingHYDROhalo.calculate("halo_number()")) - 1 ]
 
-            CentersMergingObjectsHYDRO.append(MergingHYDROhalo["shrink_center"])
-            CentersMainHaloHYDRO.append(HYDROMainHaloThisRedshift["shrink_center"])
-
-            
-            CentersMergingObjectsDMO.append(pynbody.analysis.halo.center(ParticlesAtNextTime,retcen=True))
-            CentersMainHaloDMO.append(pynbody.analysis.halo.center(MainParticlesAtNextTime,retcen=True))
-            
+            CentersMergingObjectsHYDRO.append(pynbody.analysis.halo.center(ParticlesAtNextTime,retcen=True))
+            CentersMainHaloHYDRO.append(pynbody.analysis.halo.center(HYDROMainParticlesAtNextTime,retcen=True))
+                        
             TDMO.append(DMOhalo.calculate("t()"))
             ZDMO.append(DMOhalo.calculate("z()"))
 
-            VelDMO.append([np.mean(vels[:,0]-MainVelxNext) , np.mean(vels[:,1]-MainVelyNext), np.mean(vels[:,2] - MainVelzNext)])
+            VelHYDRO.append([np.mean(vels[:,0] - MainVelxNext) , np.mean(vels[:,1]-MainVelyNext), np.mean(vels[:,2]-MainVelzNext) ])
+            statusHYDRO.append("Next")
 
-            '''
+            # Previous
 
+            prevHnum = int(MergingHYDROhalo.calculate_for_progenitors("halo_number")[0][1]) - 1
+            ParticlesAtPrevTime = HYDROParticlesprev.halos()[prevHnum]['iord']
+            
+            vels = ParticlesAtPrevTime["vel"]
+
+            MassHYDRO.append(MergingHYDROhalo.calculate("M200c_DM"))
+            HnumsHYDRO.append(MergingHYDROhalo.calculate("halo_number()"))
+            MassMainHydro.append(HYDROMainHaloThisRedshift["M200c_DM"])
+            R200HYDRO.append(HYDROMainHaloThisRedshift.calculate("r200c"))
+            
+
+            CentersMergingObjectsHYDRO.append(pynbody.analysis.halo.center(ParticlesAtPrevTime,retcen=True))
+            CentersMainHaloHYDRO.append(pynbody.analysis.halo.center(HYDROMainParticlesAtPrevTime,retcen=True))
+                        
+            TDMO.append(DMOhalo.calculate("t()"))
+            ZDMO.append(DMOhalo.calculate("z()"))
+
+            VelHYDRO.append([np.mean(vels[:,0] - MainVelxPrev) , np.mean(vels[:,1]-MainVelyPrev), np.mean(vels[:,2]-MainVelzPrev) ])
+            statusHYDRO.append("Previous")
 
         
-        except Exception as e:
-            print(e)
+        except Exception as eHydro:
+            print(eHydro)
             continue 
             
             
 
 print(len(MassHYDRO),len(HnumsHYDRO),len(CentersMergingObjectsHYDRO),len(CentersMainHaloHYDRO),len(VelHYDRO),len(THYDRO))
 
-df = pd.DataFrame({"MergingCen":CentersMergingObjectsHYDRO,"MainCen":CentersMainHaloHYDRO,"Hnum":HnumsHYDRO,"M":MassHYDRO,"vel":VelHYDRO,"t":THYDRO,"z":ZHYDRO,"MassMain":MassMainHydro,"R200":R200HYDRO})
-dfDMO = pd.DataFrame({"MergingCen":CentersMergingObjectsDMO,"MainCen":CentersMainHaloDMO,"Hnum":HnumsDMO,"M":MassesDMO,"vel":VelDMO,"t":TDMO,"z":ZDMO,"MassMain":MassMainDMO,"R200":R200DMO})
+df = pd.DataFrame({"MergingCen":CentersMergingObjectsHYDRO,"MainCen":CentersMainHaloHYDRO,"Hnum":HnumsHYDRO,"M":MassHYDRO,"vel":VelHYDRO,"t":THYDRO,"z":ZHYDRO,"MassMain":MassMainHydro,"R200":R200HYDRO,"Status":statusHYDRO})
+dfDMO = pd.DataFrame({"MergingCen":CentersMergingObjectsDMO,"MainCen":CentersMainHaloDMO,"Hnum":HnumsDMO,"M":MassesDMO,"vel":VelDMO,"t":TDMO,"z":ZDMO,"MassMain":MassMainDMO,"R200":R200DMO,"Status":statusDMO})
 
 
 df.to_csv("dmo_hydro_crossreffs/HYDROcens_"+haloname+".csv")
